@@ -18,4 +18,5 @@ cd ${MESA_DIR}
 ./clean
 ./install
 
-mesa_test submit_revision "$MESA_DIR" --force
+# nevermind, this won't work when no jobs have been run
+#mesa_test submit_revision "$MESA_DIR" --force
