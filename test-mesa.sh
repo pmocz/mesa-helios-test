@@ -3,9 +3,9 @@
 #SBATCH -n 1
 #SBATCH -N 1
 #SBATCH -t 00:30:00
-#SBATCH -p conroy
+#SBATCH -p conroy,test,itc_cluster,shared
 #SBATCH --constraint="intel"
-#SBATCH --mem=1G
+#SBATCH --mem=4G
 
 
 set -euxo pipefail
@@ -17,10 +17,11 @@ export MY_EMAIL_ADDRESS=evan.bauer.astro@gmail.com
 export OMP_NUM_THREADS=8
 
 # set SLURM options (used for all sbatch calls)
-export INSTALL_OPTIONS="--partition=shared,itc_cluster --mem=8000 --ntasks-per-node=4"
+export INSTALL_OPTIONS="--partition=conroy --constraint=intel --mem=8000 --ntasks-per-node=8"
+#export INSTALL_OPTIONS="--partition=shared,itc_cluster --mem=8000 --ntasks-per-node=4"
 #export INSTALL_OPTIONS="--partition=test --mem=8000 --ntasks-per-node=${OMP_NUM_THREADS}"
-export MY_SLURM_OPTIONS="--partition=conroy_requeue --constraint=intel --mem=16000"
-#export MY_SLURM_OPTIONS="--partition=conroy --constraint=intel --mem=16000"
+#export MY_SLURM_OPTIONS="--partition=conroy,shared --constraint=intel --mem=16000"
+export MY_SLURM_OPTIONS="--partition=conroy --constraint=intel --mem=16000"
 #export MY_SLURM_OPTIONS="--partition=serial_requeue --mem=16000"
 #export MY_SLURM_OPTIONS="--partition=shared --mem=16000"
 

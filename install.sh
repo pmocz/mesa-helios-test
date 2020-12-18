@@ -3,13 +3,13 @@
 #SBATCH --job-name=install
 #SBATCH --nodes=1
 #SBATCH --export=ALL
-#SBATCH --time=1:00:00
+#SBATCH --time=2:00:00
 #SBATCH --mail-type=FAIL
 #SBATCH --requeue
 
 echo $PATH
 gfortran --version
-export OMP_NUM_THREADS=4
+export OMP_NUM_THREADS=8
 
 clean_caches
 

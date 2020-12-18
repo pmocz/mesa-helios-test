@@ -3,7 +3,7 @@
 #SBATCH --job-name=star
 #SBATCH --nodes=1
 #SBATCH --export=ALL
-#SBATCH --time=8:00:00
+#SBATCH --time=6:00:00
 #SBATCH --mail-type=FAIL
 #SBATCH --requeue
 
