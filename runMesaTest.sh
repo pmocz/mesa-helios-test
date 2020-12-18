@@ -1,7 +1,6 @@
 #!/bin/bash
 
-MIN_SAFE=15140
-
+# Dont let script run more than once
 if [[ $(pgrep -c "`basename $0`") -gt 1 ]]; then
     echo "Process already running"
     exit 1
@@ -13,85 +12,42 @@ echo $(date)
 #cd ~/mesa/scripts
 pwd
 
-svnsync sync file://${DATA_DIR}/assembla_mesa
+source ~/.bashrc
+source mesa_test.sh
+
+cd "$MESA_GIT" || exit
+
+# Get all updates over all branches
+git fetch --all
+git pull origin main
+
 if [[ $? != 0 ]];then
 	echo "Update failed"
 	exit 1
 fi
 
-VIN=$(svn info file://${DATA_DIR}/assembla_mesa)
-if [[ $? != 0 ]];then
-   echo "Subversion down"
-   exit 1
-fi
-
-if [[ -z "$VIN" ]];then
-   echo "Subversion failed"
-   exit 1
-fi
-
-export v_end=$(echo -e "$VIN" | grep Revision | awk '{print $2}')
-
-if [[ -z $v_end ]];then
-	echo "Head is empty"
-	exit 1
-fi
-
-if [[ $v_end -lt $MIN_SAFE ]]; then
-	echo "Version below safe version" $v_end
-	exit 1
-fi
-
-echo "Head is $v_end"
-
-
-export testhub="$DATA_DIR/testhub/"
-export OUT_FOLD="$testhub/$v_end-1"
-echo $testhub
-echo $OUT_FOLD
-if [[ -d "$OUT_FOLD" ]]; then
-	echo "Already tested up to $v_end"
-        exit 0
-fi
-
-v_start=$(basename $(find $testhub -maxdepth 1 -type d  | sort | tail -n 1 | cut -f1 -d"-"))
-v_start=$((v_start+1))
-echo "Start is $v_start"
-
-#source ~/mesa/scripts/mesa_test.sh
-source mesa_test.sh
-#rm ${MESA_OP_MONO_DATA_CACHE_FILENAME} 2>/dev/null
-
-if [[ "$v_end" -lt "$v_start" ]];then
-	echo "Head lt start" $v_end $vstart
-	exit 1
-fi
-
 last_ver=-1
-for i in $(seq $v_start 1 $v_end);
+# Loop over recent commits, do both time and number to catch when things go wrong
+for i in $(git log --since="20 minutes" --all --format="%h") $(git log -10 --all --format="%h");
 do
-	if [[ "$i" -lt $MIN_SAFE ]]; then
-        	echo "PANIC PANIC PANIC" $i
-        	exit 1
+	export OUT_FOLD=$MESA_LOG/$i
+
+	if [ -d $OUT_FOLD ]; then
+		echo "Skipping $i"
+		continue
+	else
+		echo "Submitting $i" 
+		mkdir -p "$OUT_FOLD"
 	fi
-
-
-	export OUT_FOLD="$testhub/$i"-1
-	mkdir $OUT_FOLD
-	if [[ $? -eq 1 ]];then
-		echo "Folder exists exit"
-		exit 1
-	fi
-
-	echo "Submitting $i" $OUT_FOLD
-	export VIN=$i
 
 	if [[ $last_ver -lt 0 ]]; then
-		last_ver=$(sbatch --parsable --export=VIN=$i,HOME=$HOME,OUT_FOLD=$OUT_FOLD -o "$OUT_FOLD/build.txt" test-mesa.sh)
+		last_ver=$(sbatch -o "$OUT_FOLD"/build.txt --parsable --export=VERSION=$i,HOME=$HOME,OUT_FOLD="$OUT_FOLD" "${MESA_SCRIPTS}/mesa-test.sh")
 	else
-		last_ver=$(sbatch --dependency=afterany:$last_ver --parsable --export=VIN=$i,HOME=$HOME,OUT_FOLD=$OUT_FOLD -o "$OUT_FOLD/build.txt" test-mesa.sh)
+		last_ver=$(sbatch -o "$OUT_FOLD"/build.txt --dependency=afterany:$last_ver --parsable --export=VERSION=$i,HOME=$HOME,OUT_FOLD="$OUT_FOLD" "${MESA_SCRIPTS}/mesa-test.sh")
 	fi
 	echo $last_ver
+
 done
+date
 echo "**********************"
 } 2>&1 | tee -a ${DATA_DIR}/log_mesa_test.txt
