@@ -1,4 +1,9 @@
+export MESA_GIT=$DATA_DIR/github_mesa/mesa # Where mesa-git is
+export MESA_LOG=$DATA_DIR/testhub # Where to log output to
+export MESA_TMP=$CONROY_SCRATCH/ebauer/mesa-git-tests # Where to checkout each MESA to
+export MESA_SCRIPTS=~/mesa-helios-test # Where this script sits
 
+export MESA_TEST_VERSION=_1.0.2_
 
 export OMP_NUM_THREADS=8
 export MESASDK_ROOT=$DATA_DIR/mesasdks/mesasdk-20.3.2
