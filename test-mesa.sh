@@ -103,6 +103,7 @@ fi
 rm "${MESA_DIR}"/data/*/cache/*
 # if ci skip, then exit and don't submit any further tests
 if [[ $skip_tests -eq 1 ]];then
+    rm -rf $MESA_DIR
     exit 0
 fi
 
