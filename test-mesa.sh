@@ -1,35 +1,25 @@
 #!/bin/bash
 
-#SBATCH -n 1
 #SBATCH -N 1
-#SBATCH -t 00:30:00
-#SBATCH -p conroy,test,itc_cluster,shared
+#SBATCH -c 4
+#SBATCH -t 02:00:00
+#SBATCH -p conroy,itc_cluster,shared
 #SBATCH --constraint="intel"
-#SBATCH --mem=4G
+#SBATCH --mem=8G
+#SBATCH -J test-build
+#SBATCH --no-requeue
 
-
-set -euxo pipefail
-
-# set email address for SLURM and for cleanup output
-export MY_EMAIL_ADDRESS=evan.bauer.astro@gmail.com
-
-# set how many threads; this will also be sent to SLURM as --ntasks-per-node
-export OMP_NUM_THREADS=8
 
 # set SLURM options (used for all sbatch calls)
-export INSTALL_OPTIONS="--partition=conroy --constraint=intel --mem=8000 --ntasks-per-node=8"
-#export INSTALL_OPTIONS="--partition=shared,itc_cluster --mem=8000 --ntasks-per-node=4"
-#export INSTALL_OPTIONS="--partition=test --mem=8000 --ntasks-per-node=${OMP_NUM_THREADS}"
-#export MY_SLURM_OPTIONS="--partition=conroy,shared --constraint=intel --mem=16000"
-export MY_SLURM_OPTIONS="--partition=conroy --constraint=intel --mem=16000"
+export CLEANUP_OPTIONS="--partition=conroy --constraint=intel --mem=8000 --ntasks-per-node=1"
+export MY_SLURM_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16000"
+#export MY_SLURM_OPTIONS="--partition=conroy --constraint=intel --mem=16000"
 #export MY_SLURM_OPTIONS="--partition=serial_requeue --mem=16000"
 #export MY_SLURM_OPTIONS="--partition=shared --mem=16000"
-
 
 # set other relevant MESA options
 #export MESA_RUN_OPTIONAL=t
 #export MESA_FPE_CHECKS_ON=1
-
 
 # set paths for OP opacities
 #export MESA_OP_MONO_DATA_PATH=${DATA_DIR}/OP4STARS_1.3/mono
@@ -40,37 +30,83 @@ export MY_SLURM_OPTIONS="--partition=conroy --constraint=intel --mem=16000"
 #export MESA_CACHES_DIR=/tmp/mesa-cache
 
 
-# set MESA_DIR
-# export MESA_DIR=
+echo $HOME
+cd ~/mesa-helios-test
+pwd
+
+echo $OUT_FOLD
+echo "-----"
+
+source ~/.bashrc
+
+# Dont let this file get confused with mesa_test.sh
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+	echo "script ${BASH_SOURCE[0]} is being sourced ..."
+	exit 1
+fi
+
+echo $SLURM_JOB_NODELIST
+echo $SLURM_LOCALID
+echo $SLURM_NODE_ALIASES
+echo $SLURM_NODEID
+echo $SLURM_JOB_ID
+echo $SLURMD_NODENAME
+echo $OUT_FOLD
+echo $HOME
+echo "**********"
+
+source mesa_test.sh
+
+# set email address for SLURM and for cleanup output
+export MY_EMAIL_ADDRESS=evan.bauer.astro@gmail.com
+
+export OMP_NUM_THREADS=4
+
+echo $MESASDK_ROOT
+echo $VERSION
+
+
+# Limit number of mesa's being tested at once
+while [[ $(ls -d "${MESA_TMP}"/tmp.* | wc -l) -gt 10 ]];
+do
+	echo "Too many tests in progress sleeping"
+	date
+	sleep 10m
+done
+
+# Make a temporay folder to build mesa in
+export MESA_DIR=$(mktemp -d -p "$MESA_TMP")
+echo $MESA_DIR
+echo $HOME
+
+# Checkout and install to new folder
+mesa_test $MESA_TEST_VERSION install -c --mesadir=$MESA_DIR $VERSION
+mesa_test $MESA_TEST_VERSION submit -e --mesadir=$MESA_DIR
+
+
+if ! grep -q "MESA installation was successful" "$MESA_DIR/build.log" ; then
+	echo "Checkout failed"
+	exit 1
+fi
+
+cd "${MESA_DIR}" || exit
+
+# Look for tests to be skipped
+export skip_tests=0
+if [[ $(git log -1) == *'[ci skip]'* ]];then
+    export skip_tests=1
+fi
+
+rm "${MESA_DIR}"/data/*/cache/*
+# if ci skip, then exit and don't submit any further tests
+if [[ $skip_tests -eq 1 ]];then
+    exit 0
+fi
 
 # if USE_MESA_TEST is set, use mesa_test gem; pick its options via MESA_TEST_OPTIONS
 # otherwise, use built-in each_test_run script
 export USE_MESA_TEST=t
-export MESA_TEST_OPTIONS="--force" # --no-submit"
-
-export MESA_DIR=${CONROY_SCRATCH}/ebauer/mesa-svn$VIN
-export USE_MESA_TEST=t
-
-
-# if directory is already being tested, exit
-if [ -e ${MESA_DIR}/.testing ]; then
-    echo "Tests are in-progress"
-    exit 1
-fi
-
-svn co -r "$VIN" file://${DATA_DIR}/assembla_mesa/trunk ${MESA_DIR}
-if [ $? -ne 0 ]
-then
-    echo "Failed to checkout SVN"
-    exit 1
-fi
-
-# extract the "true" svn version
-(
-    cd ${MESA_DIR}
-    svnversion > test.version
-)
-
+export MESA_TEST_OPTIONS="--force --mesadir=${MESA_DIR}" # --no-submit"
 
 # function to clean caches; executed at start of each job
 clean_caches(){
@@ -83,39 +119,12 @@ clean_caches(){
 
 export -f clean_caches
 
-# mark directory as being tested
-touch ${MESA_DIR}/.testing
 
-# submit job to install MESA
-export INSTALL_JOBID=$(sbatch --parsable \
-                              --output="${OUT_FOLD}/install.log" \
-                              --mail-user=${MY_EMAIL_ADDRESS} \
-                              ${INSTALL_OPTIONS} \
-                              install.sh)
+# Need to be in mesa-helios-test to submit the jobs
+cd $MESA_SCRIPTS
 
-
-# if ci skip, then only run the first star test, cleanup, and exit
-if [[ $(svn log -r "$VIN" file://${DATA_DIR}/assembla_mesa/trunk) == *'[ci skip]'* ]];then
-        # run just the first star test
-	export STAR_JOBID=$(sbatch --parsable \
-                                   --ntasks-per-node=${OMP_NUM_THREADS} \
-                                   --array=1-1 \
-                                   --output="${OUT_FOLD}/star.log-%a" \
-                                   --dependency=afterok:${INSTALL_JOBID} \
-                                   --mail-user=${MY_EMAIL_ADDRESS} \
-                                   ${MY_SLURM_OPTIONS} \
-                                   star.sh)
-
-	sbatch --output="${OUT_FOLD}/cleanup.log" \
-	       --dependency=afterany:${STAR_JOBID} \
-	       ${MY_SLURM_OPTIONS} \
-	       cleanup.sh
-
-	exit 0
-fi
-
-# submit job to report build error
-# sbatch error.sh -W depend=afternotok:${INSTALL_JOBID}
+# set how many threads; this will also be sent to SLURM as --ntasks-per-node
+export OMP_NUM_THREADS=8
 
 # run the star test suite
 # this is part is parallelized, so get the number of tests
@@ -127,7 +136,6 @@ export STAR_JOBID=$(sbatch --parsable \
                            --ntasks-per-node=${OMP_NUM_THREADS} \
                            --array=1-${NTESTS} \
                            --output="${OUT_FOLD}/star.log-%a" \
-                           --dependency=afterok:${INSTALL_JOBID} \
                            --mail-user=${MY_EMAIL_ADDRESS} \
                            ${MY_SLURM_OPTIONS} \
                            star.sh)
@@ -143,7 +151,6 @@ export BINARY_JOBID=$(sbatch --parsable \
                              --ntasks-per-node=${OMP_NUM_THREADS} \
                              --array=1-${NTESTS} \
                              --output="${OUT_FOLD}/binary.log-%a" \
-                             --dependency=afterok:${INSTALL_JOBID}\
                              --mail-user=${MY_EMAIL_ADDRESS} \
                              ${MY_SLURM_OPTIONS} \
                              binary.sh)
@@ -159,7 +166,6 @@ export ASTERO_JOBID=$(sbatch --parsable \
                              --ntasks-per-node=${OMP_NUM_THREADS} \
                              --array=1-${NTESTS} \
                              --output="${OUT_FOLD}/astero.log-%a" \
-                             --dependency=afterok:${INSTALL_JOBID}\
                              --mail-user=${MY_EMAIL_ADDRESS} \
                              ${MY_SLURM_OPTIONS} \
                              astero.sh)
@@ -167,6 +173,6 @@ export ASTERO_JOBID=$(sbatch --parsable \
 
 sbatch --output="${OUT_FOLD}/cleanup.log" \
        --dependency=afterany:${STAR_JOBID},afterany:${BINARY_JOBID},afterany:${ASTERO_JOBID} \
-       ${MY_SLURM_OPTIONS} \
+       ${CLEANUP_OPTIONS} \
        cleanup.sh
 
