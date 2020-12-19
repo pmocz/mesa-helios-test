@@ -11,11 +11,11 @@
 
 
 # set SLURM options (used for all sbatch calls)
-export CLEANUP_OPTIONS="--partition=conroy --constraint=intel --mem=8000 --ntasks-per-node=1"
-export MY_SLURM_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16000"
-#export MY_SLURM_OPTIONS="--partition=conroy --constraint=intel --mem=16000"
-#export MY_SLURM_OPTIONS="--partition=serial_requeue --mem=16000"
-#export MY_SLURM_OPTIONS="--partition=shared --mem=16000"
+export CLEANUP_OPTIONS="--partition=conroy --constraint=intel --mem=8G --ntasks-per-node=1"
+export MY_SLURM_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G"
+#export MY_SLURM_OPTIONS="--partition=conroy --constraint=intel --mem=16G"
+#export MY_SLURM_OPTIONS="--partition=serial_requeue --mem=16G"
+#export MY_SLURM_OPTIONS="--partition=shared --mem=16G"
 
 # set other relevant MESA options
 #export MESA_RUN_OPTIONAL=t
