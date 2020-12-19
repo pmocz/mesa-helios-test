@@ -15,6 +15,8 @@ pwd
 source ~/.bashrc
 source mesa_test.sh
 
+module load git
+
 cd "$MESA_GIT" || exit
 
 # Get all updates over all branches
@@ -41,9 +43,9 @@ do
 	fi
 
 	if [[ $last_ver -lt 0 ]]; then
-		last_ver=$(sbatch -o "$OUT_FOLD"/build.txt --parsable --export=VERSION=$i,HOME=$HOME,OUT_FOLD="$OUT_FOLD" "${MESA_SCRIPTS}/mesa-test.sh")
+		last_ver=$(sbatch -o "$OUT_FOLD"/build.txt --parsable --export=VERSION=$i,HOME=$HOME,OUT_FOLD="$OUT_FOLD" "${MESA_SCRIPTS}/test-mesa.sh")
 	else
-		last_ver=$(sbatch -o "$OUT_FOLD"/build.txt --dependency=afterany:$last_ver --parsable --export=VERSION=$i,HOME=$HOME,OUT_FOLD="$OUT_FOLD" "${MESA_SCRIPTS}/mesa-test.sh")
+		last_ver=$(sbatch -o "$OUT_FOLD"/build.txt --dependency=afterany:$last_ver --parsable --export=VERSION=$i,HOME=$HOME,OUT_FOLD="$OUT_FOLD" "${MESA_SCRIPTS}/test-mesa.sh")
 	fi
 	echo $last_ver
 
