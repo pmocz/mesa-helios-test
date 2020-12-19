@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #SBATCH -N 1
-#SBATCH -c 4
+#SBATCH -c 8
 #SBATCH -t 02:00:00
-#SBATCH -p conroy,itc_cluster,shared
+#SBATCH -p test,conroy,itc_cluster,shared
 #SBATCH --constraint="intel"
 #SBATCH --mem=8G
 #SBATCH -J test-build
@@ -60,7 +60,8 @@ source mesa_test.sh
 # set email address for SLURM and for cleanup output
 export MY_EMAIL_ADDRESS=evan.bauer.astro@gmail.com
 
-export OMP_NUM_THREADS=4
+# set how many threads; this will also be sent to SLURM as --ntasks-per-node
+export OMP_NUM_THREADS=8
 
 echo $MESASDK_ROOT
 echo $VERSION
@@ -78,6 +79,8 @@ done
 export MESA_DIR=$(mktemp -d -p "$MESA_TMP")
 echo $MESA_DIR
 echo $HOME
+
+module load git
 
 # Checkout and install to new folder
 mesa_test $MESA_TEST_VERSION install -c --mesadir=$MESA_DIR $VERSION
@@ -122,9 +125,6 @@ export -f clean_caches
 
 # Need to be in mesa-helios-test to submit the jobs
 cd $MESA_SCRIPTS
-
-# set how many threads; this will also be sent to SLURM as --ntasks-per-node
-export OMP_NUM_THREADS=8
 
 # run the star test suite
 # this is part is parallelized, so get the number of tests
