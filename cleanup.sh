@@ -11,14 +11,7 @@
 # at the time the cleanup script is executed
 sleep 30
 
-# get MESA version
 cd ${MESA_DIR}
-VERSION_DATA=$(<data/version_number)
-VERSION_VC=$(<test.version)
-
-# make version string "real (reported)"
-VERSION="${VERSION_VC} (${VERSION_DATA})"
-
 rm -r star/test_suite/*/*LOGS*
 rm -r star/test_suite/*/*photo*
 rm star/test_suite/*/star
