@@ -1,4 +1,4 @@
-export MESA_GIT=$DATA_DIR/github_mesa/mesa # Where mesa-git is
+export MESA_GIT=$DATA_DIR/github_mesa/.mesa_test/mirror # Where mesa-git is
 export MESA_LOG=$DATA_DIR/testhub # Where to log output to
 export MESA_TMP=$CONROY_SCRATCH/ebauer/mesa-git-tests # Where to checkout each MESA to
 export MESA_SCRIPTS=~/mesa-helios-test # Where this script sits

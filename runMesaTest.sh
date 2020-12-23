@@ -21,7 +21,6 @@ cd "$MESA_GIT" || exit
 
 # Get all updates over all branches
 git fetch --all
-git pull origin main
 
 if [[ $? != 0 ]];then
 	echo "Update failed"
