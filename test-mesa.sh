@@ -134,14 +134,16 @@ cd ${MESA_DIR}/star/test_suite
 export NTESTS=$(./count_tests)
 cd -
 
-export STAR_JOBID=$(sbatch --parsable \
-                           --ntasks-per-node=${OMP_NUM_THREADS} \
-                           --array=1-${NTESTS} \
-                           --output="${OUT_FOLD}/star.log-%a" \
-                           --mail-user=${MY_EMAIL_ADDRESS} \
-                           ${MY_SLURM_OPTIONS} \
-                           star.sh)
-
+if [[ $NTESTS -gt 0 ]]; then
+    export STAR_JOBID=$(sbatch --parsable \
+                               --ntasks-per-node=${OMP_NUM_THREADS} \
+                               --array=1-${NTESTS} \
+                               --output="${OUT_FOLD}/star.log-%a" \
+                               --mail-user=${MY_EMAIL_ADDRESS} \
+                               ${MY_SLURM_OPTIONS} \
+                               star.sh)
+    depend=afterany:$STAR_JOBID
+fi
 
 # run the binary test suite
 # this is part is parallelized, so get the number of tests
@@ -149,13 +151,16 @@ cd ${MESA_DIR}/binary/test_suite
 export NTESTS=$(./count_tests)
 cd -
 
-export BINARY_JOBID=$(sbatch --parsable \
-                             --ntasks-per-node=${OMP_NUM_THREADS} \
-                             --array=1-${NTESTS} \
-                             --output="${OUT_FOLD}/binary.log-%a" \
-                             --mail-user=${MY_EMAIL_ADDRESS} \
-                             ${MY_SLURM_OPTIONS} \
-                             binary.sh)
+if [[ $NTESTS -gt 0 ]]; then
+    export BINARY_JOBID=$(sbatch --parsable \
+                                 --ntasks-per-node=${OMP_NUM_THREADS} \
+                                 --array=1-${NTESTS} \
+                                 --output="${OUT_FOLD}/binary.log-%a" \
+                                 --mail-user=${MY_EMAIL_ADDRESS} \
+                                 ${MY_SLURM_OPTIONS} \
+                                 binary.sh)
+    depend=${depend},afterany:$BINARY_JOBID
+fi
 
 
 # run the astero test suite
@@ -164,17 +169,22 @@ cd ${MESA_DIR}/astero/test_suite
 export NTESTS=$(./count_tests)
 cd -
 
-export ASTERO_JOBID=$(sbatch --parsable \
-                             --ntasks-per-node=${OMP_NUM_THREADS} \
-                             --array=1-${NTESTS} \
-                             --output="${OUT_FOLD}/astero.log-%a" \
-                             --mail-user=${MY_EMAIL_ADDRESS} \
-                             ${MY_SLURM_OPTIONS} \
-                             astero.sh)
+if [[ $NTESTS -gt 0 ]]; then
+    export ASTERO_JOBID=$(sbatch --parsable \
+                                 --ntasks-per-node=${OMP_NUM_THREADS} \
+                                 --array=1-${NTESTS} \
+                                 --output="${OUT_FOLD}/astero.log-%a" \
+                                 --mail-user=${MY_EMAIL_ADDRESS} \
+                                 ${MY_SLURM_OPTIONS} \
+                                 astero.sh)
+    depend=${depend},afterany:$ASTERO_JOBID
+fi
 
+echo "Dependencies for cleanup:"
+echo $depend
 
 sbatch --output="${OUT_FOLD}/cleanup.log" \
-       --dependency=afterany:${STAR_JOBID},afterany:${BINARY_JOBID},afterany:${ASTERO_JOBID} \
+       --dependency=${depend} \
        ${CLEANUP_OPTIONS} \
        cleanup.sh
 
