@@ -17,3 +17,5 @@ export SDK=1
 #export OP_MONO_BASE=~/mesa/mesa
 #export MESA_OP_MONO_DATA_PATH=$OP_MONO_BASE/OP4STARS_1.3/mono
 #export MESA_OP_MONO_DATA_CACHE_FILENAME=$OP_MONO_BASE/OP4STARS_1.3/mono/op_mono_cache.bin
+
+export MESA_GIT_LFS_SLEEP=30

@@ -82,6 +82,9 @@ echo $HOME
 
 module load git
 
+echo "MESA_GIT_LFS_SLEEP:"
+echo $MESA_GIT_LFS_SLEEP
+
 # Checkout and install to new folder
 mesa_test $MESA_TEST_VERSION install -c --mesadir=$MESA_DIR $VERSION
 mesa_test $MESA_TEST_VERSION submit -e --mesadir=$MESA_DIR
