@@ -3,7 +3,7 @@
 #SBATCH --job-name=astero
 #SBATCH --nodes=1
 #SBATCH --export=ALL
-#SBATCH --time=1:00:00
+#SBATCH --time=1:30:00
 #SBATCH --mail-type=FAIL
 #SBATCH --requeue
 

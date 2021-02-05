@@ -3,15 +3,17 @@
 #SBATCH -N 1
 #SBATCH -c 8
 #SBATCH -t 02:00:00
-#SBATCH -p test,conroy,itc_cluster,shared
+#SBATCH -p conroy,itc_cluster,shared
 #SBATCH --constraint="intel"
 #SBATCH --mem=8G
+#SBATCH --exclude=holy2c01304,holy2c01302
+#SBATCH --export=ALL
 #SBATCH -J test-build
 #SBATCH --no-requeue
 
 
 # set SLURM options (used for all sbatch calls)
-export CLEANUP_OPTIONS="--partition=conroy --constraint=intel --mem=8G --ntasks-per-node=1"
+export CLEANUP_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=4G --ntasks-per-node=1"
 export MY_SLURM_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G"
 #export MY_SLURM_OPTIONS="--partition=conroy --constraint=intel --mem=16G"
 #export MY_SLURM_OPTIONS="--partition=serial_requeue --mem=16G"
@@ -45,6 +47,7 @@ if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
 	exit 1
 fi
 
+echo $DATACENTER
 echo $SLURM_JOB_NODELIST
 echo $SLURM_LOCALID
 echo $SLURM_NODE_ALIASES
@@ -68,7 +71,7 @@ echo $VERSION
 
 
 # Limit number of mesa's being tested at once
-while [[ $(ls -d "${MESA_TMP}"/tmp.* | wc -l) -gt 10 ]];
+while [[ $(ls -d "${MESA_TMP}"/tmp.* | wc -l) -gt 20 ]];
 do
 	echo "Too many tests in progress sleeping"
 	date
@@ -84,6 +87,9 @@ module load git
 
 echo "MESA_GIT_LFS_SLEEP:"
 echo $MESA_GIT_LFS_SLEEP
+
+which git
+which git-lfs
 
 # Checkout and install to new folder
 mesa_test $MESA_TEST_VERSION install -c --mesadir=$MESA_DIR $VERSION

@@ -27,9 +27,11 @@ rm -r astero/test_suite/*/*photo*
 rm astero/test_suite/*/star
 rm astero/test_suite/*/*.mod
 
-cp -r star/test_suite ${OUT_FOLD}/star_test_suite
-cp -r binary/test_suite ${OUT_FOLD}/binary_test_suite
-cp -r astero/test_suite ${OUT_FOLD}/astero_test_suite
+cp --parents star/test_suite/*/*.txt ${OUT_FOLD}
+cp --parents binary/test_suite/*/*.txt ${OUT_FOLD}
+cp --parents astero/test_suite/*/*.txt ${OUT_FOLD}
+
+cp --parents star/test_suite/*/png/*png ${OUT_FOLD}
 
 echo "test results copied to storage, removing MESA_DIR"
 
