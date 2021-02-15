@@ -158,7 +158,6 @@ if [[ $NTESTS -gt 0 ]]; then
                                --mail-user=${MY_EMAIL_ADDRESS} \
                                ${MY_SLURM_OPTIONS} \
                                star.sh)
-	depend=afterany:$STAR_JOBID
     else
 	export STAR_JOBID=$(sbatch --parsable \
                                --ntasks-per-node=${OMP_NUM_THREADS} \
@@ -167,8 +166,8 @@ if [[ $NTESTS -gt 0 ]]; then
                                --mail-user=${MY_EMAIL_ADDRESS} \
                                ${MY_SLURM_OPTIONS} \
                                star.sh)
-	depend=afterany:$STAR_JOBID
     fi
+    depend=afterany:$STAR_JOBID
 fi
 
 # run the binary test suite
