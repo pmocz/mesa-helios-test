@@ -110,6 +110,11 @@ if [[ $(git log -1) == *'[ci skip]'* ]];then
     export skip_tests=1
 fi
 
+export split_tests=0
+if [[ $(git log -1) == *'[ci split]'* ]];then
+    export split_tests=1
+fi
+
 rm "${MESA_DIR}"/data/*/cache/*
 # if ci skip, then exit and don't submit any further tests
 if [[ $skip_tests -eq 1 ]];then
@@ -144,14 +149,26 @@ export NTESTS=$(./count_tests)
 cd -
 
 if [[ $NTESTS -gt 0 ]]; then
-    export STAR_JOBID=$(sbatch --parsable \
+    if [[ $split_tests -eq 1 ]];then
+	half=$((NTESTS/2))
+	export STAR_JOBID=$(sbatch --parsable \
+                               --ntasks-per-node=${OMP_NUM_THREADS} \
+                               --array=1-${half} \
+                               --output="${OUT_FOLD}/star.log-%a" \
+                               --mail-user=${MY_EMAIL_ADDRESS} \
+                               ${MY_SLURM_OPTIONS} \
+                               star.sh)
+	depend=afterany:$STAR_JOBID
+    else
+	export STAR_JOBID=$(sbatch --parsable \
                                --ntasks-per-node=${OMP_NUM_THREADS} \
                                --array=1-${NTESTS} \
                                --output="${OUT_FOLD}/star.log-%a" \
                                --mail-user=${MY_EMAIL_ADDRESS} \
                                ${MY_SLURM_OPTIONS} \
                                star.sh)
-    depend=afterany:$STAR_JOBID
+	depend=afterany:$STAR_JOBID
+    fi
 fi
 
 # run the binary test suite
