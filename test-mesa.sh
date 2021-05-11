@@ -121,6 +121,10 @@ if [[ $(git log -1) == *'[ci optional'* ]];then
     export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G --time=12:00:00"
 fi
 
+if [[ $(git log -1) == *'[ci fpe]'* ]];then
+    export MESA_FPE_CHECKS_ON=1
+fi
+
 rm "${MESA_DIR}"/data/*/cache/*
 # if ci skip, then exit and don't submit any further tests
 if [[ $skip_tests -eq 1 ]];then
