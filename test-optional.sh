@@ -21,6 +21,7 @@ export MY_SLURM_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=inte
 
 # set other relevant MESA options
 export MESA_RUN_OPTIONAL=t
+unset MESA_SKIP_OPTIONAL
 #export MESA_FPE_CHECKS_ON=1
 
 # set paths for OP opacities

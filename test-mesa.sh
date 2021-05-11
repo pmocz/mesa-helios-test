@@ -24,6 +24,9 @@ export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --
 #export MESA_RUN_OPTIONAL=t
 #export MESA_FPE_CHECKS_ON=1
 
+# make sure this is on by default for when we update to using this instead of MESA_RUN_OPTIONAL
+export MESA_SKIP_OPTIONAL=t
+
 # set paths for OP opacities
 #export MESA_OP_MONO_DATA_PATH=${DATA_DIR}/OP4STARS_1.3/mono
 #export MESA_OP_MONO_DATA_CACHE_FILENAME=${DATA_DIR}/OP4STARS_1.3/mono/op_mono_cache.bin
@@ -118,6 +121,7 @@ fi
 
 if [[ $(git log -1) == *'[ci optional'* ]];then
     export MESA_RUN_OPTIONAL=t
+    unset MESA_SKIP_OPTIONAL
     export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G --time=12:00:00"
 fi
 
