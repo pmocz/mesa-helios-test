@@ -172,16 +172,41 @@ if [[ $NTESTS -gt 0 ]]; then
                                --mail-user=${MY_EMAIL_ADDRESS} \
                                ${STAR_OPTIONS} \
                                star.sh)
+	depend=afterany:$STAR_JOBID
     else
-	export STAR_JOBID=$(sbatch --parsable \
+	if [[ $NTESTS -gt 10 ]]; then
+	    # submit the first 10 tests with 16 cores
+	    export OMP_NUM_THREADS=16
+	    export STAR_JOBID1=$(sbatch --parsable \
+                               --ntasks-per-node=${OMP_NUM_THREADS} \
+                               --array=1-10 \
+                               --output="${OUT_FOLD}/star.log-%a" \
+                               --mail-user=${MY_EMAIL_ADDRESS} \
+                               ${STAR_OPTIONS} \
+                               star.sh)
+	    export OMP_NUM_THREADS=8
+	    export STAR_JOBID2=$(sbatch --parsable \
+                               --ntasks-per-node=${OMP_NUM_THREADS} \
+                               --array=11-${NTESTS} \
+                               --output="${OUT_FOLD}/star.log-%a" \
+                               --mail-user=${MY_EMAIL_ADDRESS} \
+                               ${STAR_OPTIONS} \
+                               star.sh)
+	    depend=afterany:$STAR_JOBID1,afterany:$STAR_JOBID2
+	else
+	    # just submit all the tests for 16 cores
+	    export OMP_NUM_THREADS=16
+	    export STAR_JOBID=$(sbatch --parsable \
                                --ntasks-per-node=${OMP_NUM_THREADS} \
                                --array=1-${NTESTS} \
                                --output="${OUT_FOLD}/star.log-%a" \
                                --mail-user=${MY_EMAIL_ADDRESS} \
                                ${STAR_OPTIONS} \
                                star.sh)
+	    export OMP_NUM_THREADS=8
+	    depend=afterany:$STAR_JOBID
+	fi
     fi
-    depend=afterany:$STAR_JOBID
 fi
 
 # run the binary test suite
