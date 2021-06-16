@@ -93,8 +93,8 @@ which git
 which git-lfs
 
 # Checkout and install to new folder
-mesa_test $MESA_TEST_VERSION install -c --mesadir=$MESA_DIR $VERSION
-mesa_test $MESA_TEST_VERSION submit -e --mesadir=$MESA_DIR
+mesa_test install -c --mesadir=$MESA_DIR $VERSION
+mesa_test submit -e --mesadir=$MESA_DIR
 
 
 if ! grep -q "MESA installation was successful" "$MESA_DIR/build.log" ; then
