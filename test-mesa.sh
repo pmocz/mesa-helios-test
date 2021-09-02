@@ -2,7 +2,7 @@
 
 #SBATCH -N 1
 #SBATCH -c 8
-#SBATCH -t 02:00:00
+#SBATCH -t 03:00:00
 #SBATCH -p conroy,itc_cluster,shared
 #SBATCH --constraint="intel"
 #SBATCH --mem=8G
@@ -122,6 +122,11 @@ fi
 if [[ $(git log -1) == *'[ci optional'* ]];then
     export MESA_RUN_OPTIONAL=t
     unset MESA_SKIP_OPTIONAL
+    export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G --time=12:00:00"
+fi
+
+if [[ $(git log -1) == *'[ci converge]'* ]];then
+    export MESA_TEST_SUITE_RESOLUTION_FACTOR=0.8
     export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G --time=12:00:00"
 fi
 

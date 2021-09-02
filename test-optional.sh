@@ -2,7 +2,7 @@
 
 #SBATCH -N 1
 #SBATCH -c 8
-#SBATCH -t 02:00:00
+#SBATCH -t 03:00:00
 #SBATCH -p test,conroy,itc_cluster,shared
 #SBATCH --constraint="intel"
 #SBATCH --mem=8G
@@ -109,12 +109,16 @@ cd "${MESA_DIR}" || exit
 export skip_tests=0
 export split_tests=0
 
+if [[ $(git log -1) == *'[ci fpe]'* ]];then
+    export MESA_FPE_CHECKS_ON=1
+fi
+
 rm "${MESA_DIR}"/data/*/cache/*
 
 # if USE_MESA_TEST is set, use mesa_test gem; pick its options via MESA_TEST_OPTIONS
 # otherwise, use built-in each_test_run script
 export USE_MESA_TEST=t
-export MESA_TEST_OPTIONS="--force --mesadir=${MESA_DIR}" # --no-submit"
+export MESA_TEST_OPTIONS="--force --mesadir=${MESA_DIR} --force-logs" # --no-submit"
 
 # function to clean caches; executed at start of each job
 clean_caches(){
