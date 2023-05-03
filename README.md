@@ -1,11 +1,11 @@
 
 ## Running
 
-`cronjob` shows the crontab for running the MESA test suite.
+`scronjob` shows the scrontab for running the MESA test suite. This is a recurring slurm job, which replaces the previous crontab.
 - Every 5 minutes, we call `launch.sh`, which logs a small amount of information about my current overall cluster usage, and then launches MESA test suite runs by calling `runMesaTest.sh`
 - Once per night around 2am, we call runMesaOptional.sh, which just submits the latest commit at the head of `main` and runs all tests with the optional inlists included.
 
-`runMesaTest.sh` runs every 5 minutes on the login node, so it needs to be fairly lightweight. It simply sets the relevant environment variables (see `mesa_test.sh`), fetches the latest commits, and submits installation jobs for any commit that does not yet exist in the `$MESA_LOG` directory. 
+`runMesaTest.sh` is a fairly lightweight launching script that sets up the other jobs. It simply sets the relevant environment variables (see `mesa_test.sh`), fetches the latest commits, and submits installation jobs for any commit that does not yet exist in the `$MESA_LOG` directory. 
 
 Each commit that needs to be installed gets submitted as a slurm job running `test-mesa.sh`. This does a full MESA checkout and installation, and then submits job arrays for the test suites. The array index (`$SLURM_ARRAY_TASK_ID`) tells the following scripts which entry from `do1_test_source` to run.
 - `star.sh` runs an array for all the tests in `star/test_suite/do1_test_source`
