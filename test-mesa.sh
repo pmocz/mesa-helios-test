@@ -6,7 +6,6 @@
 #SBATCH -p conroy,itc_cluster,shared
 #SBATCH --constraint="intel"
 #SBATCH --mem=8G
-#SBATCH --exclude=holy2c01304,holy2c01302
 #SBATCH --export=ALL
 #SBATCH -J test-build
 #SBATCH --no-requeue
@@ -14,11 +13,8 @@
 
 # set SLURM options (used for all sbatch calls)
 export CLEANUP_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=4G --ntasks-per-node=1"
-export MY_SLURM_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G"
-export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G --time=6:00:00"
-#export MY_SLURM_OPTIONS="--partition=conroy --constraint=intel --mem=16G"
-#export MY_SLURM_OPTIONS="--partition=serial_requeue --mem=16G"
-#export MY_SLURM_OPTIONS="--partition=shared --mem=16G"
+export MY_SLURM_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=15G"
+export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=15G --time=6:00:00"
 
 # set other relevant MESA options
 #export MESA_RUN_OPTIONAL=t
@@ -122,12 +118,12 @@ fi
 if [[ $(git log -1) == *'[ci optional'* ]];then
     export MESA_RUN_OPTIONAL=t
     unset MESA_SKIP_OPTIONAL
-    export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G --time=12:00:00"
+    export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=15G --time=12:00:00"
 fi
 
 if [[ $(git log -1) == *'[ci converge]'* ]];then
     export MESA_TEST_SUITE_RESOLUTION_FACTOR=0.8
-    export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G --time=12:00:00"
+    export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=15G --time=12:00:00"
 fi
 
 if [[ $(git log -1) == *'[ci fpe]'* ]];then
