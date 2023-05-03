@@ -6,7 +6,6 @@
 #SBATCH -p test,conroy,itc_cluster,shared
 #SBATCH --constraint="intel"
 #SBATCH --mem=8G
-#SBATCH --exclude=holy2c01304,holy2c01302
 #SBATCH --export=ALL
 #SBATCH -J test-opt
 #SBATCH --no-requeue
