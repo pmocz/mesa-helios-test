@@ -1,3 +1,0 @@
-SHELL=/usr/bin/bash
-*/5 * * * * $HOME/mesa-helios-test/launch.sh > $HOME/mesa-helios-test/latest_cron_output.txt
-02 02 * * * $HOME/mesa-helios-test/runOptional.sh > $HOME/mesa-helios-test/latest_optional.txt

@@ -48,4 +48,4 @@ sbatch -o "$OUT_FOLD"/build.txt --export=VERSION=$i,HOME=$HOME,OUT_FOLD="$OUT_FO
 
 date
 echo "**********************"
-} 2>&1 | tee -a ${DATA_DIR}/log_mesa_optional.txt
+} 2>&1 | tee -a ~/log_mesa_optional.txt

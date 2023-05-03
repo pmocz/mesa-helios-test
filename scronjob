@@ -1,0 +1,21 @@
+
+#SCRON -N 1
+#SCRON -c 1
+#SCRON -t 00:05:00
+#SCRON -p conroy
+#SCRON --mem=1G
+#SCRON --export=ALL
+#SCRON -J launch-test
+#SCRON --output=mesa-helios-test/launch-output/launch-%j
+*/5 * * * * $HOME/mesa-helios-test/launch.sh
+
+#SCRON -N 1
+#SCRON -c 1
+#SCRON -t 00:10:00
+#SCRON -p conroy
+#SCRON --mem=1G
+#SCRON --export=ALL
+#SCRON -J launch-opt
+#SCRON --output=mesa-helios-test/launch-output/launch-opt-%j
+02 02 * * * $HOME/mesa-helios-test/runOptional.sh
+

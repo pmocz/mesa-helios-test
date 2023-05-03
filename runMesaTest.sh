@@ -29,7 +29,7 @@ fi
 
 last_ver=-1
 # Loop over recent commits, do both time and number to catch when things go wrong
-for i in $(git log --since="10 minutes" --all --format="%h") $(git log -10 --all --format="%h");
+for i in $(git log --since="10 minutes" --all --format="%h") $(git log -15 --all --format="%h");
 do
 	export OUT_FOLD=$MESA_LOG/$i
 
@@ -51,4 +51,4 @@ do
 done
 date
 echo "**********************"
-} 2>&1 | tee -a ${DATA_DIR}/log_mesa_test.txt
+} 2>&1 | tee -a ~/log_mesa_test.txt
