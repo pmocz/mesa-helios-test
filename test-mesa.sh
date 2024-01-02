@@ -83,7 +83,8 @@ export MESA_DIR=$(mktemp -d -p "$MESA_TMP")
 echo $MESA_DIR
 echo $HOME
 
-module load git
+#module load git
+spack load git-lfs # also loads a newer git
 
 echo "MESA_GIT_LFS_SLEEP:"
 echo $MESA_GIT_LFS_SLEEP

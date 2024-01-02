@@ -15,7 +15,8 @@ pwd
 source ~/.bashrc
 source mesa_test.sh
 
-module load git
+#module load git
+spack load git-lfs # also loads a new git
 
 cd "$MESA_GIT" || exit
 
