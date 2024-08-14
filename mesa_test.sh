@@ -5,7 +5,7 @@ export MESA_TMP=$CONROY_SCRATCH/ebauer/mesa-git-tests # Where to checkout each M
 export MESA_SCRIPTS=~/mesa-helios-test # Where this script sits
 
 export OMP_NUM_THREADS=8
-export MESASDK_ROOT=$DATA_DIR/mesasdks/mesasdk-23.7.3
+export MESASDK_ROOT=$DATA_DIR/mesasdks/mesasdk-24.7.1
 export MESA_CLUSTER=~/mesa-test
 #export GYRE_DIR=$MESA_DIR/gyre/gyre
 source $MESASDK_ROOT/bin/mesasdk_init.sh
