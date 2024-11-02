@@ -2,7 +2,7 @@
 #SCRON -N 1
 #SCRON -c 1
 #SCRON -t 00:10:00
-#SCRON -p conroy
+#SCRON -p gen
 #SCRON --mem=1G
 #SCRON --export=ALL
 #SCRON -J launch-test
@@ -12,7 +12,7 @@
 #SCRON -N 1
 #SCRON -c 1
 #SCRON -t 00:10:00
-#SCRON -p conroy
+#SCRON -p gen
 #SCRON --mem=1G
 #SCRON --export=ALL
 #SCRON -J launch-opt

@@ -3,8 +3,7 @@
 #SBATCH -N 1
 #SBATCH -c 8
 #SBATCH -t 03:00:00
-#SBATCH -p test,conroy,itc_cluster,shared
-#SBATCH --constraint="intel"
+#SBATCH -p gen
 #SBATCH --mem=8G
 #SBATCH --export=ALL
 #SBATCH -J test-opt
@@ -12,11 +11,8 @@
 
 
 # set SLURM options (used for all sbatch calls)
-export CLEANUP_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=4G --ntasks-per-node=1"
-export MY_SLURM_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=16G"
-#export MY_SLURM_OPTIONS="--partition=conroy --constraint=intel --mem=16G"
-#export MY_SLURM_OPTIONS="--partition=serial_requeue --mem=16G"
-#export MY_SLURM_OPTIONS="--partition=shared --mem=16G"
+export CLEANUP_OPTIONS="--gen --mem=4G --ntasks-per-node=1"
+export MY_SLURM_OPTIONS="--gen --mem=16G"
 
 # set other relevant MESA options
 export MESA_RUN_OPTIONAL=t
@@ -61,10 +57,10 @@ echo "**********"
 source mesa_test.sh
 
 # set email address for SLURM and for cleanup output
-export MY_EMAIL_ADDRESS=evan.bauer.astro@gmail.com
+export MY_EMAIL_ADDRESS=pmocz@flatironinstitute.org
 
 # set how many threads; this will also be sent to SLURM as --ntasks-per-node
-export OMP_NUM_THREADS=8
+export OMP_NUM_THREADS=64
 
 echo $MESASDK_ROOT
 echo $VERSION
@@ -83,8 +79,8 @@ export MESA_DIR=$(mktemp -d -p "$MESA_TMP")
 echo $MESA_DIR
 echo $HOME
 
-#module load git
-spack load git-lfs # also loads a new git
+module load git
+#spack load git-lfs # also loads a new git
 
 echo "MESA_GIT_LFS_SLEEP:"
 echo $MESA_GIT_LFS_SLEEP

@@ -1,10 +1,9 @@
 #!/bin/bash
 
 #SBATCH -N 1
-#SBATCH -c 8
-#SBATCH -t 03:00:00
-#SBATCH -p conroy,itc_cluster,shared
-#SBATCH --constraint="intel"
+#SBATCH -c 16
+#SBATCH -t 02:00:00
+#SBATCH -p gen
 #SBATCH --mem=8G
 #SBATCH --export=ALL
 #SBATCH -J test-build
@@ -12,9 +11,9 @@
 
 
 # set SLURM options (used for all sbatch calls)
-export CLEANUP_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=4G --ntasks-per-node=1"
-export MY_SLURM_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=15G"
-export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=15G --time=6:00:00"
+export CLEANUP_OPTIONS="--partition=gen --mem=4G --ntasks-per-node=1"
+export MY_SLURM_OPTIONS="--partition=gen --mem=15G"
+export STAR_OPTIONS="--partition=gen --mem=15G --time=6:00:00"
 
 # set other relevant MESA options
 #export MESA_RUN_OPTIONAL=t
@@ -61,10 +60,10 @@ echo "**********"
 source mesa_test.sh
 
 # set email address for SLURM and for cleanup output
-export MY_EMAIL_ADDRESS=evan.bauer.astro@gmail.com
+export MY_EMAIL_ADDRESS=pmocz@flatironinstitute.org
 
 # set how many threads; this will also be sent to SLURM as --ntasks-per-node
-export OMP_NUM_THREADS=8
+export OMP_NUM_THREADS=64
 
 echo $MESASDK_ROOT
 echo $VERSION
@@ -83,8 +82,8 @@ export MESA_DIR=$(mktemp -d -p "$MESA_TMP")
 echo $MESA_DIR
 echo $HOME
 
-#module load git
-spack load git-lfs # also loads a newer git
+module load git
+#spack load git-lfs # also loads a newer git
 
 echo "MESA_GIT_LFS_SLEEP:"
 echo $MESA_GIT_LFS_SLEEP
@@ -95,6 +94,8 @@ which git-lfs
 # Checkout and install to new folder
 mesa_test install -c --mesadir=$MESA_DIR $VERSION
 mesa_test submit -e --mesadir=$MESA_DIR
+
+echo "submitted empty mesa test at: $MESA_DIR"
 
 
 if ! grep -q "MESA installation was successful" "$MESA_DIR/build.log" ; then
@@ -119,12 +120,12 @@ fi
 if [[ $(git log -1) == *'[ci optional'* ]];then
     export MESA_RUN_OPTIONAL=t
     unset MESA_SKIP_OPTIONAL
-    export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=15G --time=12:00:00"
+    export STAR_OPTIONS="--partition=gen --mem=15G --time=12:00:00"
 fi
 
 if [[ $(git log -1) == *'[ci converge]'* ]];then
     export MESA_TEST_SUITE_RESOLUTION_FACTOR=0.8
-    export STAR_OPTIONS="--partition=conroy,shared,itc_cluster --constraint=intel --mem=15G --time=12:00:00"
+    export STAR_OPTIONS="--partition=gen --mem=15G --time=12:00:00"
 fi
 
 if [[ $(git log -1) == *'[ci fpe]'* ]];then
@@ -178,7 +179,7 @@ if [[ $NTESTS -gt 0 ]]; then
     else
 	if [[ $NTESTS -gt 10 ]]; then
 	    # submit the first 10 tests with 16 cores
-	    export OMP_NUM_THREADS=16
+	    export OMP_NUM_THREADS=64
 	    export STAR_JOBID1=$(sbatch --parsable \
                                --ntasks-per-node=${OMP_NUM_THREADS} \
                                --array=1-10 \
@@ -186,7 +187,7 @@ if [[ $NTESTS -gt 0 ]]; then
                                --mail-user=${MY_EMAIL_ADDRESS} \
                                ${STAR_OPTIONS} \
                                star.sh)
-	    export OMP_NUM_THREADS=8
+	    export OMP_NUM_THREADS=64
 	    export STAR_JOBID2=$(sbatch --parsable \
                                --ntasks-per-node=${OMP_NUM_THREADS} \
                                --array=11-${NTESTS} \
@@ -197,7 +198,7 @@ if [[ $NTESTS -gt 0 ]]; then
 	    depend=afterany:$STAR_JOBID1,afterany:$STAR_JOBID2
 	else
 	    # just submit all the tests for 16 cores
-	    export OMP_NUM_THREADS=16
+	    export OMP_NUM_THREADS=64
 	    export STAR_JOBID=$(sbatch --parsable \
                                --ntasks-per-node=${OMP_NUM_THREADS} \
                                --array=1-${NTESTS} \
@@ -205,7 +206,7 @@ if [[ $NTESTS -gt 0 ]]; then
                                --mail-user=${MY_EMAIL_ADDRESS} \
                                ${STAR_OPTIONS} \
                                star.sh)
-	    export OMP_NUM_THREADS=8
+	    export OMP_NUM_THREADS=64
 	    depend=afterany:$STAR_JOBID
 	fi
     fi
