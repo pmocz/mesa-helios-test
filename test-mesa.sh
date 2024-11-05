@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH -N 1
-#SBATCH -c 16
+#SBATCH -c 64
 #SBATCH -t 02:00:00
 #SBATCH -p gen
 #SBATCH --mem=8G
