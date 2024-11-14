@@ -4,6 +4,7 @@
 #SBATCH -c 8
 #SBATCH -t 03:00:00
 #SBATCH -p gen
+#SBATCH --constraint="genoa"
 #SBATCH --mem=8G
 #SBATCH --export=ALL
 #SBATCH -J test-opt
@@ -11,8 +12,8 @@
 
 
 # set SLURM options (used for all sbatch calls)
-export CLEANUP_OPTIONS="--gen --mem=4G --ntasks-per-node=1"
-export MY_SLURM_OPTIONS="--gen --mem=16G"
+export CLEANUP_OPTIONS="--gen --constraint=genoa --mem=4G --ntasks-per-node=1"
+export MY_SLURM_OPTIONS="--gen --constraint=genoa --mem=16G"
 
 # set other relevant MESA options
 export MESA_RUN_OPTIONAL=t

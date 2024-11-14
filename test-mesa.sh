@@ -4,6 +4,7 @@
 #SBATCH -c 64
 #SBATCH -t 02:00:00
 #SBATCH -p gen
+#SBATCH --constraint="genoa"
 #SBATCH --mem=8G
 #SBATCH --export=ALL
 #SBATCH -J test-build
@@ -11,9 +12,9 @@
 
 
 # set SLURM options (used for all sbatch calls)
-export CLEANUP_OPTIONS="--partition=gen --mem=4G --ntasks-per-node=1"
-export MY_SLURM_OPTIONS="--partition=gen --mem=15G"
-export STAR_OPTIONS="--partition=gen --mem=15G --time=6:00:00"
+export CLEANUP_OPTIONS="--partition=gen --constraint=genoa --mem=4G --ntasks-per-node=1"
+export MY_SLURM_OPTIONS="--partition=gen --constraint=genoa --mem=15G"
+export STAR_OPTIONS="--partition=gen --constraint=genoa --mem=15G --time=6:00:00"
 
 # set other relevant MESA options
 #export MESA_RUN_OPTIONAL=t
@@ -120,12 +121,12 @@ fi
 if [[ $(git log -1) == *'[ci optional'* ]];then
     export MESA_RUN_OPTIONAL=t
     unset MESA_SKIP_OPTIONAL
-    export STAR_OPTIONS="--partition=gen --mem=15G --time=12:00:00"
+    export STAR_OPTIONS="--partition --constraint=genoa --mem=15G --time=12:00:00"
 fi
 
 if [[ $(git log -1) == *'[ci converge]'* ]];then
     export MESA_TEST_SUITE_RESOLUTION_FACTOR=0.8
-    export STAR_OPTIONS="--partition=gen --mem=15G --time=12:00:00"
+    export STAR_OPTIONS="--partition=gen --constraint=genoa --mem=15G --time=12:00:00"
 fi
 
 if [[ $(git log -1) == *'[ci fpe]'* ]];then
