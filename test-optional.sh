@@ -12,8 +12,8 @@
 
 
 # set SLURM options (used for all sbatch calls)
-export CLEANUP_OPTIONS="--gen --constraint=genoa --mem=4G --ntasks-per-node=1"
-export MY_SLURM_OPTIONS="--gen --constraint=genoa --mem=16G"
+export CLEANUP_OPTIONS="--partition=gen --constraint=genoa --mem=4G --ntasks-per-node=1"
+export MY_SLURM_OPTIONS="--partition=gen --constraint=genoa --mem=16G"
 
 # set other relevant MESA options
 export MESA_RUN_OPTIONAL=t
